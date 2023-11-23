@@ -1,7 +1,7 @@
 
 trigger:
 - master
-    
+     
 jobs:
 - job: Linux
   pool:

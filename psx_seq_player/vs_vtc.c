@@ -1,6 +1,6 @@
 #include "lib_spu.hpp"
 
-short SsVabTransCompleted(short immediateFlag)
+extern "C" short SsVabTransCompleted(short immediateFlag)
 {
     long ret = SpuIsTransferCompleted(immediateFlag);
     return ret;

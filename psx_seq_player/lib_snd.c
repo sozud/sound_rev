@@ -1,8 +1,8 @@
 #include "lib_snd.hpp"
 #include "lib_spu.hpp"
 
-#include <stdio.h> // printf
-#include <sys/types.h>
+#include <STDIO.H> // printf
+#include <SYS/TYPES.H>
 //#include <libetc.h> // ResetCallback
 #include "psx_stubs.hpp"
 

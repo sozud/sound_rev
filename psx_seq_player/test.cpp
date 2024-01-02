@@ -533,11 +533,41 @@ void test_types()
     printf("test_types: passed\n");
 }
 
+void test_ss_pitch_from_note_fast()
+{
+#define NUM_VARS 3
+    int vars[NUM_VARS] = {0, 63, 126};
+    int results[] = {
+        4096, 4214, 4336, 108, 111, 114, 3, 3, 3, 4214, 4336, 4461, 111, 114, 117, 3, 3, 3, 4336, 4461, 4589, 114, 117, 121, 3, 3, 3, 16383, 16383, 16383, 4096, 4214, 4336, 108, 111, 114, 16383, 16383, 16383, 4214, 4336, 4461, 111, 114, 117, 16383, 16383, 16383, 4336, 4461, 4589, 114, 117, 121, 16383, 16383, 16383, 16383, 16383, 16383, 4096, 4214, 4336, 16383, 16383, 16383, 16383, 16383, 16383, 4214, 4336, 4461, 16383, 16383, 16383, 16383, 16383, 16383, 4336, 4461, 4589
+    };
+    int results_pos = 0;
+    for(int i = 0; i < NUM_VARS; i++)
+    {
+        for(int j = 0; j < NUM_VARS; j++)
+        {
+            for(int k = 0; k < NUM_VARS; k++)
+            {
+                for(int l = 0; l < NUM_VARS; l++)
+                {
+                    const short realRet = SsPitchFromNote(vars[i], vars[j], vars[k], vars[l]);
+                    ASSERT_EQ(realRet, results[results_pos++]);
+                    // printf("%d, ", realRet);
+                }   
+            }        
+        }    
+    }
+
+    printf("fast: passed\n");
+
+    //ASSERT_EQ(sizeof(s64), 8);
+}
+
 void run_unit_tests()
 {
     printf("Tests start\n");
     // slow test
     // Test_SsPitchFromNote(); 
+    test_ss_pitch_from_note_fast();
     Test_SsVmSelectToneAndVag();
     Test_SsVmDoAllocate();
     Test_SsGetSeqData();

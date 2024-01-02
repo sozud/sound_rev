@@ -1092,9 +1092,10 @@ int32 PS_SPU::UpdateFromCDC(int32 clocks)
 
    return clock_divider;
 }
-
+#include <stdio.h>
 void PS_SPU::WriteDMA(uint32 V)
 {
+   printf("writedma %d\n", V);
    //SPUIRQ_DBG("DMA Write, RWAddr after=0x%06x", RWAddr);
    WriteSPURAM(RWAddr, V);
    RWAddr = (RWAddr + 1) & 0x3FFFF;

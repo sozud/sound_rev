@@ -86,6 +86,17 @@ static void VSync(int mode)
 
 static void my_audio_callback(void *userdata, Uint8 *stream, int len)
 {
+
+    for(int i = 0; i < len; i++)
+    {
+        // generate one sample
+        SPU->UpdateFromCDC(768);
+        if((i % (768*2)) == 0)
+        {
+         SsSeqCalledTbyT();
+        }
+    }
+
     printf("%d\n", IntermediateBufferPos);
     memcpy(stream, IntermediateBuffer, len);
 
@@ -97,11 +108,11 @@ static void my_audio_callback(void *userdata, Uint8 *stream, int len)
 //    IntermediateBuffer, IntermediateBufferPos
 }
 #endif
-
+       #include <unistd.h>
 int main(int argc, char* argv[])
 {
 #ifndef PSX
-    if(argc > 0)
+    if(argc > 1)
     {
         std::string arg = argv[1];
         if(arg == "test")
@@ -171,13 +182,35 @@ SeqChunkParser gChunkParser;
 
     unsigned int clocks = 0;
     printf("Enter loop\n");
-    for (;;)
+    bool quit = false;
+    int ts = 0;
+    SsSetTickMode(SS_NOTICK);
+    for (;quit != true;)
     {
-#ifndef PSX
-        clocks = SPU->UpdateFromCDC(30);
-        clocks = MDFN_IEN_PSX::DMA_Update(30);
-#endif
-        VSync(0);
+        // 563969
+// #ifndef PSX
+//         clocks = SPU->UpdateFromCDC(768);
+//         // clocks = MDFN_IEN_PSX::DMA_Update(ts);
+//         // ts += 768;
+// #endif
+//         VSync(0);
+//         usleep((1001/60000)*1000000);
+// #ifndef PSX
+//         SsSeqCalledTbyT();
+
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_QUIT:
+            quit = true;
+                break;
+             case SDL_KEYDOWN:
+             quit = true;
+                break;
+            }
+        }
+        // #endif
+
     }
 
    //  audio_batch_cb((int16_t*)&IntermediateBuffer,IntermediateBufferPos);

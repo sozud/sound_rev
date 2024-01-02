@@ -22,7 +22,7 @@
 //#pragma GCC optimize ("unroll-loops")
 
 #include "dma.h"
-
+#include <stdio.h>
 //#include "psx.h"
 //#include "mdec.h"
 //#include "cdc.h"
@@ -317,6 +317,7 @@ static INLINE void ChRW(const unsigned ch, const uint32 CRModeCache, uint32 *V, 
 	  break;
 
   case CH_SPU:
+  printf("ticking dma\n");
 	  // 0x1f801014 affects SPU DMA timing.
 	  // Wild conjecture about 0x1f801014:
 	  //
@@ -531,6 +532,9 @@ static INLINE void RunChannel(pscpu_timestamp_t timestamp, int32 clocks, int ch)
 {
  // Mask out the bits that the DMA controller will modify during the course of operation.
  const uint32 CRModeCache = DMACH[ch].ChanControl &~(0x11 << 24);
+
+if(CRModeCache != 0)
+  printf("CRModeCache %08X\n", CRModeCache);
 
  switch(ch)
  {

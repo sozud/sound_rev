@@ -87,20 +87,20 @@ static void VSync(int mode)
 static void my_audio_callback(void *userdata, Uint8 *stream, int len)
 {
 
-    for(int i = 0; i < len; i++)
+    for(int i = 0; i < 2048; i++)
     {
         // generate one sample
         SPU->UpdateFromCDC(768);
-        if((i % (768*2)) == 0)
+        if((i % (768)) == 0)
         {
          SsSeqCalledTbyT();
         }
     }
 
-    printf("%d\n", IntermediateBufferPos);
+    printf("%d %d\n", IntermediateBufferPos, len);
     memcpy(stream, IntermediateBuffer, len);
 
-    if (IntermediateBufferPos >= 4096)
+    if (IntermediateBufferPos >= 2048)
     {
         IntermediateBufferPos = 0;
     }

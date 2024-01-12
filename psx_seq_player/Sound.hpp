@@ -34,7 +34,7 @@ public:
         SsSetTickMode(SS_NOTICK);
         SsStart();
         SsSetMVol(MVOL, MVOL);
-        VSyncCallback(TickSeq);
+        VSyncCallback((void*)TickSeq);
     }
 
     bool LoadVab(unsigned char *vhBuffer, unsigned char *vbBuffer)

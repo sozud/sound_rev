@@ -35,42 +35,42 @@ void SetSpuReg(volatile u32* pReg, u32 value)
 {
     if (pReg == (volatile u32*)0x1f8010f0)
     {
-        MDFN_IEN_PSX::DMA_Write(0, (uint32)pReg, value);
+        MDFN_IEN_PSX::DMA_Write(0, (uint32)(size_t)pReg, value);
     }
     else
     {
-        SPU->Write(0, (uint32_t)pReg, value);
-        SPU->Write(0, ((uint32_t)pReg) | 2, value >> 16); // TODO: Check |2 hack works
+        SPU->Write(0, (uint32_t)(size_t)pReg, value);
+        SPU->Write(0, ((uint32_t)(size_t)pReg) | 2, value >> 16); // TODO: Check |2 hack works
     }
 }
 
 void SetSpuReg(volatile u16* pReg, u16 value)
 {
-    SPU->Write(0, (uint32_t)pReg, value);
+    SPU->Write(0, (uint32_t)(size_t)pReg, value);
 }
 
 void SetSpuReg(volatile short* pReg, short value)
 {
-    SPU->Write(0, (uint32_t)pReg, value);
+    SPU->Write(0, (uint32_t)(size_t)pReg, value);
 }
 
 u32 GetSpuRegU32(volatile u32* pReg)
 {
     if (pReg == (volatile u32*)0x1f8010f0)
     {
-        return MDFN_IEN_PSX::DMA_Read(0, (uint32)pReg);
+        return MDFN_IEN_PSX::DMA_Read(0, (uint32)(size_t)pReg);
     }
 
     // TODO: needs to be done as 2x reads ??
-    const u16 lo = SPU->Read(0, (uint32_t)pReg);
-    const u16 hi = SPU->Read(0, ((uint32_t)pReg) | 2); // TODO: Check |2 hack works
+    const u16 lo = SPU->Read(0, (uint32_t)(size_t)pReg);
+    const u16 hi = SPU->Read(0, ((uint32_t)(size_t)pReg) | 2); // TODO: Check |2 hack works
 
     return lo | ((u32)hi >> 16);
 }
 
 u16 GetSpuRegU16(volatile u16* pReg)
 {
-    return SPU->Read(0, (uint32_t)pReg);
+    return SPU->Read(0, (uint32_t)(size_t)pReg);
 }
 
 
@@ -167,7 +167,7 @@ void PlaySoundRev()
 {
     SeqChunkParser gChunkParser;
 
-    if (!gSound.LoadVab(aPbav, D_8013B6A0))
+    if (!gSound.LoadVab((unsigned char*)aPbav, (unsigned char*)D_8013B6A0))
     {
         printf("Vab load failure\n");
     }
@@ -301,5 +301,5 @@ SeqChunkParser gChunkParser;
 extern "C"
 void LoadVab(char*vh, char*vb)
 {
-    gSound.LoadVab(vh, vb) ;
+    gSound.LoadVab((unsigned char*)vh, (unsigned char*)vb) ;
 }

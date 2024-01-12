@@ -75,7 +75,7 @@ u16 GetSpuRegU16(volatile u16* pReg)
 
 
 static Sound gSound;
-static SeqChunkParser gChunkParser;
+// static SeqChunkParser gChunkParser;
 
 static void VSync(int mode)
 {
@@ -84,12 +84,53 @@ static void VSync(int mode)
 
 #include <memory.h>
 
-static void my_audio_callback(void *userdata, Uint8 *stream, int len)
+bool ready = false;
+
+double accum = 0;
+
+extern "C"
+void my_audio_callback(void *userdata, Uint8 *stream, int len)
 {
-    printf("%d\n", IntermediateBufferPos);
+    if(!ready)
+    {
+        return;
+    }
+    for(int i = 0; i < len / 4; i++)
+    {
+        // generate one sample
+        SPU->UpdateFromCDC(768);
+        if(accum >= 735.735)
+        {
+         SsSeqCalledTbyT();
+         accum -= 735.735;
+        }
+        accum += 1;
+    }
+#if 0
+    int i = 0;
+    while (i * 4 < len) {
+        // emit until we have to generate again
+        int32_t samples[2];
+
+        int32_t to_mix_l = stream[i * 4 + 1] << 8 | stream[i * 4 + 0];
+        int32_t to_mix_r = stream[i * 4 + 3] << 8 | stream[i * 4 + 2];
+
+        to_mix_l += rand();//IntermediateBuffer[i / 4][0];
+        to_mix_r += IntermediateBuffer[i / 4][1];
+
+        // stream[i * 4 + 1] = samples[0] >> 8;
+        // stream[i * 4 + 0] = samples[0];
+
+        // // right
+        // stream[i * 4 + 3] = samples[1] >> 8;
+        // stream[i * 4 + 2] = samples[1];
+        i += 1;
+    }
+#endif
+    // printf("%d %d\n", IntermediateBufferPos, len);
     memcpy(stream, IntermediateBuffer, len);
 
-    if (IntermediateBufferPos >= 4096)
+    if (IntermediateBufferPos >= 1024)
     {
         IntermediateBufferPos = 0;
     }
@@ -97,6 +138,49 @@ static void my_audio_callback(void *userdata, Uint8 *stream, int len)
 //    IntermediateBuffer, IntermediateBufferPos
 }
 #endif
+       #include <unistd.h>
+
+
+    // Sound gSound;
+    // 
+
+extern "C"
+void InitSoundRev()
+{
+    MDFN_IEN_PSX::DMA_Init();
+    MDFN_IEN_PSX::DMA_Power();
+    SPU = new PS_SPU();
+    SPU->Power();
+    ready = true;
+
+    gSound.Init();
+    SsSetTickMode(SS_NOTICK);
+}
+
+extern "C" char aPbav[];
+extern "C" char D_8013B6A0[];
+
+extern "C"
+void PlaySoundRev()
+{
+    SeqChunkParser gChunkParser;
+
+    if (!gSound.LoadVab(aPbav, D_8013B6A0))
+    {
+        printf("Vab load failure\n");
+    }
+
+    extern u8 lib_seq[];
+
+    if (!gSound.PlaySEQ(lib_seq))
+    {
+        printf("PlaySEQ failure\n");
+    }
+
+    SsSetTickMode(SS_NOTICK);
+}
+
+#if 0
 
 int main(int argc, char* argv[])
 {
@@ -115,7 +199,7 @@ int main(int argc, char* argv[])
 
     SDL_AudioSpec wav_spec = {};
     wav_spec.channels = 2;
-    wav_spec.samples = 2048/2;
+    wav_spec.samples = 2048;
     wav_spec.format = AUDIO_S16;
     wav_spec.callback = my_audio_callback;
     wav_spec.userdata = NULL;
@@ -134,6 +218,7 @@ int main(int argc, char* argv[])
     SPU = new PS_SPU();
 
     SPU->Power();
+    ready = true;
     /*
     for (int i = 0; i < 900; i++)
     {
@@ -171,17 +256,48 @@ SeqChunkParser gChunkParser;
 
     unsigned int clocks = 0;
     printf("Enter loop\n");
-    for (;;)
+    bool quit = false;
+    int ts = 0;
+    SsSetTickMode(SS_NOTICK);
+    for (;quit != true;)
     {
-#ifndef PSX
-        clocks = SPU->UpdateFromCDC(30);
-        clocks = MDFN_IEN_PSX::DMA_Update(30);
-#endif
-        VSync(0);
+        // 563969
+// #ifndef PSX
+//         clocks = SPU->UpdateFromCDC(768);
+//         // clocks = MDFN_IEN_PSX::DMA_Update(ts);
+//         // ts += 768;
+// #endif
+//         VSync(0);
+//         usleep((1001/60000)*1000000);
+// #ifndef PSX
+//         SsSeqCalledTbyT();
+
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_QUIT:
+            quit = true;
+                break;
+             case SDL_KEYDOWN:
+             quit = true;
+                break;
+            }
+        }
+        // #endif
+
     }
 
    //  audio_batch_cb((int16_t*)&IntermediateBuffer,IntermediateBufferPos);
     // 
 
     return 0;
+}
+
+
+
+#endif
+extern "C"
+void LoadVab(char*vh, char*vb)
+{
+    gSound.LoadVab(vh, vb) ;
 }

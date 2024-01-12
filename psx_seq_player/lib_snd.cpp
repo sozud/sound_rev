@@ -10,6 +10,7 @@
 #endif
 //#include <libetc.h> // ResetCallback
 #include "psx_stubs.hpp"
+#include <stdlib.h>
 
 
 #define AddBytes(T, ptr, bytes) reinterpret_cast<T *>(reinterpret_cast<unsigned char *>(ptr) + bytes)
@@ -671,6 +672,8 @@ extern "C"
         int shiftPlusFine;
         int ret;
 
+        // note += 12;
+
         shiftPlusFine = (int)(((shift & 0xff) + fine) * 0x10000) >> 0x10;
         v11 = shiftPlusFine;
         if (shiftPlusFine < 0)
@@ -699,11 +702,31 @@ extern "C"
         if (v10 < 0)
         {
             ret = -(int)v10;
+            // printf("v11 %d pos1 %d deref %d\n", v11, ((v11 << 0x10) >> 0xf),
+            //  * (unsigned short int *)((int)word_8001D0E8 + ((v11 << 0x10) >> 0xf)) 
+            // );
+            // printf("shiftPlusFine %d pos2 %d deref %d\n", shiftPlusFine, ((shiftPlusFine << 0x10) >> 0xf),
+            // * (unsigned short int *)((int)word_8001D100 + ((shiftPlusFine << 0x10) >> 0xf))
+            // );
+            #if 0
+
+            int part1 = ((int)((int) * (unsigned short int *)((int)word_8001D0E8 + ((v11 << 0x10) >> 0xf)) *
+                                (int) * (unsigned short int *)((int)word_8001D100 + ((shiftPlusFine << 0x10) >> 0xf))) >>
+                          0x10);
+
+            printf("part1 %d mine %d deref1 %d deref2 %d\n", part1, 
+                         (word_8001D0E8[v11] * word_8001D100[shiftPlusFine]) >> 0x10,
+                          word_8001D0E8[v11],
+                          word_8001D100[shiftPlusFine]
+            );
             ret = (int)(((int)((int) * (unsigned short int *)((int)word_8001D0E8 + ((v11 << 0x10) >> 0xf)) *
                                 (int) * (unsigned short int *)((int)word_8001D100 + ((shiftPlusFine << 0x10) >> 0xf))) >>
                           0x10) +
                          (1 << (ret - 1 & 0x1f))) >>
                   (ret & 0x1f);
+            #else
+            ret = ((word_8001D0E8[v11] * word_8001D100[shiftPlusFine]  >> 0x10 ) + (1 << (ret - 1 & 0x1f))) >> (ret & 0x1f);
+            #endif
         }
         else
         {
@@ -714,7 +737,9 @@ extern "C"
 
     short SsPitchFromNote(short note, short fine, unsigned char centre, unsigned char shift)
     {
-        return Our_SsPitchFromNote(note, fine, centre, shift);
+        short res = Our_SsPitchFromNote(note, fine, centre, shift);
+        // printf("note %d fine %d centre %d shift %d res %d\n", note, fine, centre, shift, res);
+        return res;//Our_SsPitchFromNote(note, fine, centre, shift);
     }
 
     short note2pitch2(short note, short fine)
@@ -1647,7 +1672,7 @@ extern "C"
                 long spuUploadAddress = _svm_vab_start[vabId];
 
                 // Use DMA
-                SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
+                SpuSetTransferMode(SPU_TRANSFER_BY_IO);
 
                 // Set DMA src
                 spuUploadAddress = SpuSetTransferStartAddr(spuUploadAddress);
@@ -1831,7 +1856,7 @@ extern "C"
         return -1;
     }
 
-    static long _SsVabSpuMallocLoader(unsigned int sizeInBytes, long /*mode*/, short vabId)
+    long _SsVabSpuMallocLoader(unsigned int sizeInBytes, long /*mode*/, short vabId)
     {
         long pSpuMem = SpuMalloc(sizeInBytes);
         if (pSpuMem == -1)
@@ -2181,6 +2206,9 @@ extern "C"
         _snd_seq_t_max = t_max; // max 16
 
         SeqStruct *pTypedTable = (SeqStruct *)table;
+
+        // printf("sizeof SeqStruct %d\n", sizeof(SeqStruct));
+        // exit(0);
 
         // Point each item to the users supplied buffer
         for (int i = 0; i < _snd_seq_s_max; i++)

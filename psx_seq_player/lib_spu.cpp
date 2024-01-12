@@ -2715,7 +2715,7 @@ void _spu_gcSPU(void)
             }
         }
     }
-
+#if 0
     // Merged tail unused blocks
     if (_spu_AllocLastNum - 1 >= 0)
     {
@@ -2733,6 +2733,7 @@ void _spu_gcSPU(void)
             pPrevBlock--;
         } while (_spu_AllocLastNum >= 0);
     }
+#endif
 }
 
 static volatile u32* _GetVoiceAddr(int word_idx1, int word_idx2)

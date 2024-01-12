@@ -138,8 +138,10 @@ void SoundRevCallback(void *userdata, Uint8 *stream, int len)
 //    IntermediateBuffer, IntermediateBufferPos
 }
 #endif
-       #include <unistd.h>
 
+#ifndef _MSC_VER
+       #include <unistd.h>
+#endif
 
     // Sound gSound;
     // 

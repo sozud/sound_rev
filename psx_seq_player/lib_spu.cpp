@@ -742,7 +742,7 @@ extern "C"
         _spu_Fw1ts();
         _spu_ssize();
 
-        SetSpuReg(SPUDMA_MADR, (u32)data);
+        SetSpuReg(SPUDMA_MADR, (u32)(size_t)data);
         SetSpuReg(SPUDMA_BCR, (size << 16) | 0x10);
         SetSpuReg(SPUDMA_CHCR, 0x1000200);
         _spu_wck = 1;

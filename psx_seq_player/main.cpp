@@ -89,7 +89,7 @@ bool ready = false;
 double accum = 0;
 
 extern "C"
-void my_audio_callback(void *userdata, Uint8 *stream, int len)
+void SoundRevCallback(void *userdata, Uint8 *stream, int len)
 {
     if(!ready)
     {
@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     wav_spec.channels = 2;
     wav_spec.samples = 2048;
     wav_spec.format = AUDIO_S16;
-    wav_spec.callback = my_audio_callback;
+    wav_spec.callback = SoundRevCallback;
     wav_spec.userdata = NULL;
     if (SDL_OpenAudio(&wav_spec, NULL) < 0) 
     {
